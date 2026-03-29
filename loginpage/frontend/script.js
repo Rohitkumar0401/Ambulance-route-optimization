@@ -1,43 +1,89 @@
+const API = 'http://localhost:4000';
 let isLogin = true;
 
 function toggleForm() {
     isLogin = !isLogin;
-    const title = document.getElementById("form-title");
-    const btn = document.getElementById("submit-btn");
-    const toggleText = document.getElementById("toggle-text");
+    document.getElementById('form-title').innerText = isLogin ? 'Welcome back' : 'Create account';
+    document.getElementById('form-sub').innerText = isLogin ? 'Sign in to your account' : 'Register to get started';
+    document.getElementById('btn-text').innerText = isLogin ? 'Sign In' : 'Register';
+    document.getElementById('name-field').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('toggle-text').innerHTML = isLogin
+        ? `Don't have an account? <span onclick="toggleForm()">Create one</span>`
+        : `Already have an account? <span onclick="toggleForm()">Sign in</span>`;
+    setMessage('', '');
+}
 
-    if(isLogin){
-        title.innerText = "Ambulance Login";
-        btn.innerText = "Login";
-        toggleText.innerHTML = `Don't have an account? <span onclick="toggleForm()">Register</span>`;
+function setMessage(msg, type) {
+    const el = document.getElementById('message');
+    el.innerText = msg;
+    el.className = type;
+}
+
+function togglePassword() {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.className = 'fas fa-eye-slash toggle-pw';
     } else {
-        title.innerText = "Register Account";
-        btn.innerText = "Register";
-        toggleText.innerHTML = `Already have an account? <span onclick="toggleForm()">Login</span>`;
+        pw.type = 'password';
+        icon.className = 'fas fa-eye toggle-pw';
     }
 }
 
-function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const message = document.getElementById("message");
+async function handleSubmit() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const name = document.getElementById('name').value.trim();
 
-    if(email === "" || password === ""){
-        message.innerText = "Please fill all fields";
-        return;
+    if (!email || !password) { setMessage('Please fill all fields', 'error'); return; }
+    if (!isLogin && !name) { setMessage('Please enter your name', 'error'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    document.getElementById('btn-text').innerText = isLogin ? 'Signing in...' : 'Registering...';
+
+    try {
+        const endpoint = isLogin ? '/login' : '/register';
+        const body = isLogin ? { email, password } : { name, email, password };
+
+        const res = await fetch(API + endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            setMessage(data.message, 'success');
+            if (isLogin) setTimeout(() => window.location.href = '#dashboard', 1500);
+        } else {
+            setMessage(data.message, 'error');
+        }
+    } catch {
+        setMessage('Cannot connect to server. Make sure backend is running.', 'error');
     }
 
-    if(isLogin){
-        message.style.color = "green";
-        message.innerText = "Login Successful (Demo)";
-    } else {
-        message.style.color = "green";
-        message.innerText = "Registered Successfully (Demo)";
-    }
+    btn.disabled = false;
+    document.getElementById('btn-text').innerText = isLogin ? 'Sign In' : 'Register';
 }
 
-function socialLogin(platform){
-    const message = document.getElementById("message");
-    message.style.color = "green";
-    message.innerText = `Logged in with ${platform} (Demo)`;
+async function socialLogin(provider) {
+    setMessage(`Connecting to ${provider}...`, '');
+    try {
+        // In production this would use OAuth — for demo we simulate with a prompt
+        const email = prompt(`Enter your ${provider} email:`);
+        if (!email) { setMessage('', ''); return; }
+        const name = email.split('@')[0];
+
+        const res = await fetch(API + '/social-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, provider })
+        });
+        const data = await res.json();
+        setMessage(data.message, data.success ? 'success' : 'error');
+    } catch {
+        setMessage('Cannot connect to server. Make sure backend is running.', 'error');
+    }
 }
