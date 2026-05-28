@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ambulance System</title>
+</head>
+<body>
+
+<h2>🚑 Smart Ambulance System</h2>
+
+<input list="places" id="origin" placeholder="Enter Origin">
+<br><br>
+<input list="places" id="destination" placeholder="Enter Destination">
+<br><br>
+
+<datalist id="places">
+    <option value="Delhi">
+    <option value="Noida">
+    <option value="Gurgaon">
+    <option value="Ghaziabad">
+    <option value="Manali">
+    <option value="Chandigarh">
+</datalist>
+
+<button onclick="getRoute()">Find Route</button>
+
+<p id="result"></p>
+
+<script>
+async function getRoute() {
+    const origin = document.getElementById("origin").value;
+    const destination = document.getElementById("destination").value;
+
+    if (!origin || !destination) {
+        alert("Enter both fields");
+        return;
+    }
+
+    const res = await fetch(
+        `http://localhost:3000/traffic?origin=${origin}&destination=${destination}`
+    );
+
+    const data = await res.json();
+
+    document.getElementById("result").innerHTML = `
+        <b>From:</b> ${data.request.origin} <br>
+        <b>To:</b> ${data.request.destination} <br>
+        <b>Distance:</b> ${data.route.distance} <br>
+        <b>Time:</b> ${data.route.duration} <br>
+        <b>🏥 Best Hospital:</b> ${data.hospital} <br><br>
+
+        <button onclick="openMap('${origin}','${destination}')">
+            📍 Open Map
+        </button>
+    `;
+}
+
+function openMap(origin, destination) {
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ambulance Queue Management - Visitors</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; display: flex; height: 100vh; }
+        
+        /* Sidebar Form */
+        .request-panel { width: 350px; background: #ffffff; padding: 25px; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        h2 { color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 10px; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 13px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Queue Display */
+        .queue-panel { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .queue-card { background: white; margin-bottom: 15px; padding: 20px; border-radius: 8px; border-left: 8px solid #ccc; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        /* Priority Colors */
+        .priority-Critical { border-left-color: #d32f2f; } /* Red */
+        .priority-High { border-left-color: #ff9800; }     /* Orange */
+        .priority-Moderate { border-left-color: #2196f3; } /* Blue */
+
+        .btn { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        .dispatch-btn { background: #2e7d32; padding: 8px 15px; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="request-panel">
+        <h2>Emergency Request</h2>
+        <form id="emergencyForm">
+            <label>Patient Name</label>
+            <input type="text" id="patientName" placeholder="Enter Name" required>
+
+            <label>Remote Location ID</label>
+            <input type="text" id="location" placeholder="e.g. Sector 7 - Rural Road" required>
+
+            <label>Emergency Severity</label>
+            <select id="severity">
+                <option value="Critical">Critical (Life Threatening)</option>
+                <option value="High">High (Serious Injury)</option>
+                <option value="Moderate">Moderate (Stable)</option>
+            </select>
+
+            <button type="button" class="btn" onclick="addToQueue()">Submit to Queue</button>
+        </form>
+    </div>
+
+    <div class="queue-panel">
+        <h2>Live Dispatch Queue</h2>
+        <div id="queueContainer">
+            </div>
+    </div>
+
+    <script>
+        // Array acting as our Queue Data Structure
+        let emergencyQueue = [];
+
+        function addToQueue() {
+            const name = document.getElementById('patientName').value;
+            const loc = document.getElementById('location').value;
+            const sev = document.getElementById('severity').value;
+
+            if(!name || !loc) return alert("Please fill all fields");
+
+            const request = { name, loc, sev, time: new Date().toLocaleTimeString() };
+            
+            // Queue Logic: Push new request to the end
+            emergencyQueue.push(request);
+            renderQueue();
+            document.getElementById('emergencyForm').reset();
+        }
+
+        function dispatch(index) {
+            alert(`Dispatching Ambulance for ${emergencyQueue[index].name}. Calculating route using Dijkstra...`);
+            // Remove from queue (FIFO)
+            emergencyQueue.splice(index, 1);
+            renderQueue();
+        }
+
+        function renderQueue() {
+            const container = document.getElementById('queueContainer');
+            container.innerHTML = '';
+
+            emergencyQueue.forEach((req, index) => {
+                container.innerHTML += `
+                    <div class="queue-card priority-${req.sev}">
+                        <div>
+                            <strong>${req.name}</strong> <br>
+                            <small>Location: ${req.loc} | Time: ${req.time}</small>
+                        </div>
+                        <div>
+                            <span style="margin-right:20px;"><strong>${req.sev}</strong></span>
+                            <button class="dispatch-btn" onclick="dispatch(${index})">Dispatch Now</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

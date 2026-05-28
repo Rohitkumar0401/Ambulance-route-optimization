@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "District A Center",
+    "latitude": 30.3165,
+    "longitude": 78.0322,
+    "region": "District A",
+    "is_remote": false
+  },
+  {
+    "id": 2,
+    "name": "Remote Village B",
+    "latitude": 30.1234,
+    "longitude": 77.9876,
+    "region": "Remote Area B",
+    "is_remote": true
+  },
+  {
+    "id": 3,
+    "name": "Hill Station C",
+    "latitude": 30.5678,
+    "longitude": 78.1234,
+    "region": "Region C",
+    "is_remote": true
+  },
+]

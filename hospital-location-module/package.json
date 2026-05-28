@@ -1,0 +1,10 @@
+{
+  "name": "hospital-location-module",
+  "version": "1.0.0",
+  "description": "Hospital & Location Management Module — pure Node.js, no frameworks",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

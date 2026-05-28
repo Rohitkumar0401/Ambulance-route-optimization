@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "City General Hospital",
+    "address": "12 Main Road, District A",
+    "latitude": 30.3165,
+    "longitude": 78.0322,
+    "contact": "01234567890",
+    "specialization": "General",
+    "available_beds": 20,
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Rural Health Center",
+    "address": "Village Road, Remote Area B",
+    "latitude": 30.1234,
+    "longitude": 77.9876,
+    "contact": "09876543210",
+    "specialization": "Emergency",
+    "available_beds": 5,
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Mountain Care Hospital",
+    "address": "Hill Station, Region C",
+    "latitude": 30.5678,
+    "longitude": 78.1234,
+    "contact": "01122334455",
+    "specialization": "Trauma",
+    "available_beds": 10,
+    "is_active": true
+  },
+  {
+    "id": 1774528415617,
+    "name": "Valley Hospital",
+    "address": "Valley Road",
+    "latitude": 30.25,
+    "longitude": 77.95,
+    "contact": "01111111111",
+    "specialization": "General",
+    "available_beds": 8,
+    "is_active": true
+  },
+  {
+    "id": 1774528493253,
+    "name": "CGS Hospital",
+    "address": "Bell Road",
+    "latitude": 56789,
+    "longitude": 9876567,
+    "contact": "973678936",
+    "specialization": "Heart Attack",
+    "available_beds": 567,
+    "is_active": true
+  }
+]
