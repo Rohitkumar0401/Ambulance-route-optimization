@@ -14,8 +14,8 @@ import UserManagement   from './components/UserManagement';
 export const PERMISSIONS = {
   admin:      ['dashboard', 'emergency', 'route', 'hospitals', 'road-scoring', 'users'],
   dispatcher: ['dashboard', 'emergency', 'route', 'hospitals', 'road-scoring'],
-  driver:     ['dashboard', 'route'],
-  user:       ['dashboard', 'route'],
+  driver:     ['dashboard', 'emergency', 'route', 'hospitals'],
+  user:       ['dashboard', 'emergency', 'route', 'hospitals'],
 };
 
 export const ROLE_LABELS = {

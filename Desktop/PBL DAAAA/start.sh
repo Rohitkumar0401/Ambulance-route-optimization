@@ -1,42 +1,75 @@
 #!/bin/bash
-echo "========================================="
-echo " Ambulance Route Optimization System"
-echo " Team: Visitors"
-echo "========================================="
+# ─────────────────────────────────────────────────────────────────────────────
+# start.sh  —  Start backend + frontend with a single command.
+#
+# Usage:
+#   bash start.sh          (or: npm start from project root)
+#
+# Stops both servers cleanly on Ctrl+C.
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Check Node
-if ! command -v node &> /dev/null; then
-  echo "❌ Node.js not found. Install from https://nodejs.org/"; exit 1
-fi
-echo "✅ Node.js $(node --version)"
+ROOT="$(cd "$(dirname "$0")" && pwd)"
 
-# Check MySQL
-if ! command -v mysql &> /dev/null; then
-  echo "❌ MySQL not found. Install from https://dev.mysql.com/downloads/mysql/"; exit 1
-fi
-echo "✅ MySQL found"
-
-# Install deps
-echo "📦 Installing backend dependencies..."
-npm install --silent
-
-echo "📦 Installing frontend dependencies..."
-(cd frontend && npm install --silent)
-
-# Init DB
-echo "🗄️  Initializing database..."
-npm run db:init
-if [ $? -ne 0 ]; then
-  echo "❌ DB init failed. Check .env credentials (DB_PASSWORD=root12345)"; exit 1
+# Load .env if present
+if [ -f "$ROOT/.env" ]; then
+  export $(grep -v '^#' "$ROOT/.env" | xargs)
 fi
 
+# Defaults
+export DB_HOST="${DB_HOST:-localhost}"
+export DB_USER="${DB_USER:-root}"
+export DB_PASSWORD="${DB_PASSWORD:-root12345}"
+export DB_NAME="${DB_NAME:-ambulance_optimization}"
+export JWT_SECRET="${JWT_SECRET:-ambulance_route_optimization_secret_key_2024_secure}"
+export PORT="${PORT:-5001}"
+
 echo ""
-echo "========================================="
-echo "✅ Setup complete!"
+echo "╔══════════════════════════════════════════════════════╗"
+echo "║   🚑  Ambulance Route Optimization System           ║"
+echo "╚══════════════════════════════════════════════════════╝"
 echo ""
-echo "Run in TWO terminals:"
-echo "  Terminal 1: npm run server   (backend  → port 5001)"
-echo "  Terminal 2: npm run dev      (frontend → port 3000)"
+
+# ── Start backend ─────────────────────────────────────────────────────────────
+echo "▶ Starting Java backend on port $PORT…"
+bash "$ROOT/build_and_run.sh" &
+BACKEND_PID=$!
+
+# Wait for backend to be ready (up to 20s)
+echo -n "  Waiting for backend"
+for i in $(seq 1 20); do
+  sleep 1
+  if curl -s "http://localhost:$PORT/health" > /dev/null 2>&1; then
+    echo " ✅"
+    break
+  fi
+  echo -n "."
+done
+
+# ── Start frontend ────────────────────────────────────────────────────────────
+echo "▶ Starting React frontend on port 3000…"
+PORT=3000 npm start --prefix "$ROOT/frontend" &
+FRONTEND_PID=$!
+
 echo ""
-echo "Login: admin@ambulance.com / admin123"
-echo "========================================="
+echo "  Backend  → http://localhost:$PORT"
+echo "  Frontend → http://localhost:3000"
+echo ""
+echo "  Press Ctrl+C to stop both servers."
+echo ""
+
+# ── Trap Ctrl+C and kill both ─────────────────────────────────────────────────
+cleanup() {
+  echo ""
+  echo "Stopping servers…"
+  kill $BACKEND_PID  2>/dev/null
+  kill $FRONTEND_PID 2>/dev/null
+  # Kill any child processes of the backend (the java process)
+  pkill -P $BACKEND_PID 2>/dev/null
+  pkill -P $FRONTEND_PID 2>/dev/null
+  echo "Done."
+  exit 0
+}
+trap cleanup INT TERM
+
+# Keep script alive
+wait

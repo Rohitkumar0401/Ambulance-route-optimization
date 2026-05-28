@@ -1,290 +1,279 @@
 # Ambulance Route Optimization System
 
-**Team Name:** Visitors
+**Team:** Visitors | **Course:** PBL — Design & Analysis of Algorithms
 
-## Project Overview
-An intelligent route optimization system for ambulances in remote areas, computing the fastest and safest routes by considering distance, traffic, road conditions, and roadblocks.
+An intelligent emergency response system that computes the fastest and safest ambulance routes by factoring in real-time traffic, road conditions, and roadblocks. Includes a secondary MDVRP (Multi-Depot Vehicle Routing) module for general delivery/transport routing.
 
-## Technology Stack
-- **Backend:** C++, Node.js, Express.js, RESTful APIs
-- **Frontend:** HTML, CSS, JavaScript, React.js
-- **Database:** MySQL (Relational Database)
-- **Authentication:** JWT (JSON Web Tokens)
-- **Security:** bcrypt for password hashing
+---
 
-## Modules
-1. **Route Optimization Module** (Dijkstra's/A*) - Rohit Kumar (Lead)
-2. **Traffic & Road Condition Analysis Module** - Karan Singh
-3. **Hospital & Location Management Module** - Rahul Singh
-4. **Emergency Request Handling Module** - Kabeer Kandari
-5. **User Authentication & Data Security Module** - Rohit Kumar
+## Tech Stack
 
-## Key Features
-✅ Shortest & safest route computation using Dijkstra's/A* Algorithm  
-✅ Dynamic rerouting based on traffic and roadblocks  
-✅ Queue-based ambulance request handling (FIFO with priority)  
-✅ Fast hospital search using Binary Search  
-✅ Route ranking using Quick Sort/Merge Sort  
-✅ Secure authentication with JWT  
-✅ Input validation and error handling  
-✅ RESTful API architecture  
+| Layer | Technology |
+|-------|-----------|
+| Backend | Java 17+ (pure `com.sun.net.httpserver`) |
+| Frontend | React 18, Leaflet, React Router 6 |
+| Database | MySQL 8 |
+| Auth | Manual HS256 JWT + Spring Security BCrypt |
+| Build | `build_and_run.sh` (no Maven/Gradle) |
+
+---
+
+## Project Structure
+
+```
+PBL DAAAA/
+├── backend/
+│   ├── MainServer.java                  ← Unified HTTP server (port 5001)
+│   ├── config/
+│   │   ├── DatabaseConfig.java          ← Shared JDBC connection
+│   │   └── DbInit.java                  ← Schema + seed data runner
+│   ├── database/
+│   │   └── schema.sql                   ← Full MySQL schema
+│   ├── utils/
+│   │   └── ErrorHandler.java
+│   └── modules/
+│       ├── alerts/
+│       │   └── AlertController.java
+│       ├── emergency-request/
+│       │   ├── EmergencyController.java
+│       │   └── models/RequestQueue.java
+│       ├── hospital-management/         ← See hospital-management/README.md
+│       │   ├── Hospital.java
+│       │   ├── HospitalController.java
+│       │   ├── HospitalRepository.java
+│       │   └── HospitalSearch.java
+│       ├── road-scoring/
+│       │   └── RoadScoringController.java
+│       ├── route-optimization/
+│       │   ├── AmbulanceGraph.java
+│       │   ├── RouteOptimizationController.java
+│       │   └── algorithms/
+│       │       ├── Graph.java
+│       │       ├── Dijkstra.java            ← MDVRP Dijkstra (integer nodes)
+│       │       ├── DijkstraAlgorithm.java   ← Ambulance Dijkstra (GPS coords)
+│       │       ├── AStarAlgorithm.java
+│       │       ├── MapFactory.java
+│       │       ├── Main.java
+│       │       └── Server.java
+│       ├── traffic-analysis/
+│       │   ├── TrafficController.java
+│       │   └── models/TrafficAnalyzer.java
+│       └── user-authentication/
+│           ├── AuthController.java
+│           └── middleware/AuthMiddleware.java
+├── frontend/
+│   ├── src/
+│   │   ├── App.js
+│   │   └── components/
+│   │       ├── Dashboard.js
+│   │       ├── EmergencyRequest.js
+│   │       ├── HospitalManagement.js
+│   │       ├── Login.js
+│   │       ├── RoadScoring.js
+│   │       ├── RouteOptimization.js
+│   │       └── UserManagement.js
+│   └── public/
+│       ├── index.html
+│       ├── hospitals.html
+│       ├── mdvrp.html               ← MDVRP interactive map UI
+│       ├── mdvrp-script.js
+│       └── mdvrp-style.css
+├── mysql-connector-j.jar
+├── spring-security-crypto.jar
+├── build_and_run.sh                 ← Main build + run script
+└── .env                             ← Environment config (not committed)
+```
+
+---
 
 ## Prerequisites
-- Node.js (v14 or higher)
-- MySQL (v8.0 or higher)
-- npm or yarn package manager
-- Git
 
-## Installation & Setup
+- Java JDK 17+
+- MySQL 8.0+
+- Node.js 14+ and npm (for the React frontend)
+- `mysql-connector-j.jar` and `spring-security-crypto.jar` in the project root
 
-### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd ambulance-route-optimization
-```
+---
 
-### 2. Backend Setup
+## Setup
 
-#### Install Backend Dependencies
-```bash
-npm install
-```
+### 1. Configure environment
 
-#### Configure Environment Variables
-Create a `.env` file in the root directory:
-```bash
-cp .env.example .env
-```
+Copy `.env.example` to `.env` and fill in your MySQL credentials:
 
-Edit `.env` with your configuration:
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=your_mysql_password
+DB_PASSWORD=your_password
 DB_NAME=ambulance_optimization
-PORT=5000
-JWT_SECRET=your_secure_jwt_secret_key_here
-NODE_ENV=development
+PORT=5001
+JWT_SECRET=your_secure_jwt_secret
 ```
 
-#### Initialize Database
+### 2. Initialize the database
+
 ```bash
-npm run db:init
+bash build_and_run.sh db-init
 ```
 
-This will:
-- Create the database
-- Set up all tables
-- Insert sample data
-- Create admin user (email: admin@ambulance.com, password: admin123)
+This creates the database, all tables, and seeds:
+- 5 sample hospitals
+- Admin user (`admin@ambulance.com` / `admin123`)
+- Sample road scores, alerts, and emergency requests
 
-### 3. Frontend Setup
+### 3. Install frontend dependencies
 
-#### Install Frontend Dependencies
 ```bash
 cd frontend
 npm install
-cd ..
 ```
+
+---
 
 ## Running the Application
 
-### Development Mode
+### Backend (Java server)
 
-#### Start Backend Server
 ```bash
-npm run server
-```
-Backend will run on: http://localhost:5000
-
-#### Start Frontend (in a new terminal)
-```bash
-npm run dev
-```
-Frontend will run on: http://localhost:3000
-
-### Production Mode
-
-#### Build Frontend
-```bash
-npm run build
+bash build_and_run.sh
 ```
 
-#### Start Production Server
+Compiles all Java source files and starts the server on **http://localhost:5001**.
+
+### Frontend (React dev server)
+
 ```bash
+cd frontend
 npm start
 ```
 
-## Available Scripts
+Opens the React app on **http://localhost:3000**.
 
-### Backend Scripts
-- `npm run server` - Start development server
-- `npm run db:init` - Initialize database with schema and sample data
-- `npm start` - Start production server
+### MDVRP Routing UI
 
-### Frontend Scripts
-- `npm run dev` - Start React development server
-- `npm run build` - Build for production
+Once the backend is running, open **http://localhost:5001/mdvrp.html** (served as a static file) or navigate to it via the React app.
 
-## API Endpoints
+---
+
+## API Reference
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login, returns JWT |
 
 ### Emergency Requests
-- `POST /api/emergency/create` - Create emergency request
-- `GET /api/emergency/next` - Get next request from queue
-- `PUT /api/emergency/update-status` - Update request status
-- `GET /api/emergency/all` - Get all requests
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/emergency/create` | Create emergency request |
+| GET | `/api/emergency/next` | Dequeue next request (FIFO + priority) |
+| PUT | `/api/emergency/update-status` | Update request status |
+| GET | `/api/emergency/all` | List all requests |
 
 ### Hospital Management
-- `GET /api/hospitals` - Get all hospitals
-- `GET /api/hospitals/search?name=<name>` - Search hospital by name
-- `GET /api/hospitals/nearest?latitude=<lat>&longitude=<lng>&count=<n>` - Find nearest hospitals
-- `POST /api/hospitals/add` - Add new hospital
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/hospitals` | List all hospitals |
+| GET | `/api/hospitals/:id` | Get hospital by ID |
+| POST | `/api/hospitals/add` | Add hospital |
+| PUT | `/api/hospitals/:id` | Update hospital |
+| DELETE | `/api/hospitals/:id` | Delete hospital |
+| GET | `/api/hospitals/search?name=` | Binary search by name |
+| GET | `/api/hospitals/nearest?lat=&lon=&count=` | Find nearest hospitals |
 
 ### Route Optimization
-- `POST /api/route-optimization/calculate` - Calculate optimal route
-- `POST /api/route-optimization/reroute` - Dynamic rerouting
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/route-optimization/calculate` | Compute optimal route (Dijkstra/A*) |
+| POST | `/api/route-optimization/reroute` | Dynamic reroute around roadblock |
 
-### Traffic Analysis
-- `GET /api/traffic-analysis/traffic/:roadId` - Get traffic data
-- `POST /api/traffic-analysis/traffic/update` - Update traffic condition
-- `GET /api/traffic-analysis/road-conditions/:roadId` - Get road conditions
-- `POST /api/traffic-analysis/roadblock/report` - Report roadblock
+### Traffic & Road Conditions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/traffic-analysis/traffic/:roadId` | Get traffic data |
+| POST | `/api/traffic-analysis/traffic/update` | Update traffic condition |
+| GET | `/api/traffic-analysis/road-conditions/:roadId` | Get road condition |
+| POST | `/api/traffic-analysis/roadblock/report` | Report a roadblock |
 
-## Edge Cases & Security Features
+### Road Scoring
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/road-scoring/score/:roadId` | Get composite road score |
+| POST | `/api/road-scoring/score/update` | Update road score |
 
-### Input Validation
-✅ Email format validation  
-✅ Password strength requirements (min 8 characters)  
-✅ Phone number format validation  
-✅ Coordinate range validation (latitude: -90 to 90, longitude: -180 to 180)  
-✅ Severity level validation  
-✅ Status validation  
-✅ Algorithm choice validation  
+### MDVRP (Delivery/Transport Routing)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/delivery/map` | Delivery map (100 nodes) |
+| POST | `/api/delivery/route` | Compute delivery route |
+| GET | `/api/transport/map` | Transport map (20 nodes) |
+| POST | `/api/transport/route` | Compute transport route |
 
-### Error Handling
-✅ Database connection errors  
-✅ Duplicate entry prevention  
-✅ Invalid reference handling  
-✅ JWT token expiration  
-✅ 404 route not found  
-✅ Global error handler  
-✅ Request payload size limits  
+### Misc
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Server health check |
 
-### Security Features
-✅ Password hashing with bcrypt (10 rounds)  
-✅ JWT-based authentication  
-✅ Role-based access control  
-✅ SQL injection prevention (parameterized queries)  
-✅ CORS configuration  
-✅ Request logging  
+---
 
-### Data Integrity
-✅ Duplicate hospital prevention  
-✅ Duplicate user prevention  
-✅ Request existence validation  
-✅ Empty queue handling  
-✅ Null/undefined checks  
-✅ Same start-destination handling  
+## Algorithms
+
+| Algorithm | Location | Use Case |
+|-----------|----------|----------|
+| Dijkstra (GPS) | `DijkstraAlgorithm.java` | Ambulance shortest path with real lat/lon coordinates |
+| A* | `AStarAlgorithm.java` | Heuristic-guided ambulance routing |
+| Dijkstra (graph) | `algorithms/Dijkstra.java` | MDVRP integer-node routing |
+| Greedy Nearest Neighbour | `algorithms/Dijkstra.java` | TSP heuristic for multi-stop routes |
+| Binary Search | `HospitalSearch.java` | Fast hospital lookup by name |
+| Quicksort | `HospitalSearch.java` | Nearest hospital ranking by distance |
+| Priority Queue (FIFO) | `RequestQueue.java` | Emergency request handling |
+
+---
 
 ## Default Credentials
-After running `npm run db:init`, use these credentials to login:
 
-**Admin Account:**
-- Email: `admin@ambulance.com`
-- Password: `admin123`
+After `db-init`:
 
-⚠️ **Important:** Change the default password after first login in production!
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@ambulance.com` | `admin123` |
 
-## Database Schema
+> Change the default password before any production use.
 
-### Tables
-- `users` - User authentication and roles
-- `hospitals` - Hospital information and locations
-- `emergency_requests` - Emergency request queue
-- `traffic_data` - Real-time traffic information
-- `road_conditions` - Road quality and status
-- `roadblocks` - Active roadblock reports
-- `routes` - Computed route history
-
-## Project Structure
-```
-ambulance-route-optimization/
-├── backend/
-│   ├── config/
-│   │   ├── database.js          # Database connection
-│   │   └── dbInit.js            # Database initialization
-│   ├── modules/
-│   │   ├── route-optimization/  # Dijkstra's & A* algorithms
-│   │   ├── traffic-analysis/    # Traffic monitoring
-│   │   ├── hospital-management/ # Hospital search & ranking
-│   │   ├── emergency-request/   # Request queue (FIFO)
-│   │   └── user-authentication/ # JWT auth & security
-│   ├── utils/
-│   │   └── errorHandler.js      # Global error handling
-│   ├── database/
-│   │   └── schema.sql           # Database schema
-│   └── server.js                # Express server
-├── frontend/
-│   ├── src/
-│   │   ├── components/          # React components
-│   │   ├── App.js
-│   │   └── index.js
-│   └── public/
-├── .env.example                 # Environment template
-├── package.json
-└── README.md
-```
+---
 
 ## Troubleshooting
 
-### Database Connection Issues
+**MySQL connection refused**
 ```bash
-# Check MySQL is running
-mysql --version
-
-# Test connection
-mysql -u root -p
-
-# Grant privileges
-GRANT ALL PRIVILEGES ON ambulance_optimization.* TO 'root'@'localhost';
-FLUSH PRIVILEGES;
+mysql -u root -p   # verify MySQL is running
 ```
 
-### Port Already in Use
+**Port already in use**
 ```bash
-# Change PORT in .env file
-PORT=5001
+# Change PORT in .env
+PORT=5002
 ```
 
-### Module Not Found Errors
+**Compilation errors**
 ```bash
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
+# Ensure both JARs are in the project root
+ls *.jar
 ```
 
-## Future Enhancements
-- Real-time GPS tracking integration
-- Mobile application (iOS/Android)
-- WebSocket for live updates
-- Advanced traffic prediction using ML
-- Integration with Google Maps API
-- SMS/Push notifications
-- Multi-language support
-- Analytics dashboard
+**Frontend not loading**
+```bash
+cd frontend && npm install && npm start
+```
 
-## Team Members
-- **Rohit Kumar** (Lead) - Route Optimization Module (Dijkstra's/A*) & User Authentication Module
-- **Rahul Singh** - Hospital & Location Management Module
-- **Karan Singh** - Traffic & Road Condition Analysis Module
-- **Kabeer Kandari** - Emergency Request Handling Module
+---
 
-## License
-MIT License
+## Team
 
-## Support
-For issues and questions, please contact the development team.
+| Member | Module |
+|--------|--------|
+| Rohit Kumar (Lead) | Route Optimization (Dijkstra/A*) + User Authentication |
+| Rahul Singh | Hospital & Location Management |
+| Karan Singh | Traffic & Road Condition Analysis |
+| Kabeer Kandari | Emergency Request Handling |

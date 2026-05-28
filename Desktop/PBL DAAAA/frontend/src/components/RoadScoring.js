@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const API = 'http://localhost:5001/api';
+const authH = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` });
 const scoreColor = s => s >= 80 ? '#ef4444' : s >= 60 ? '#f59e0b' : '#10b981';
 const flagBadge  = s => ({ critical:'badge-red', warning:'badge-yellow', good:'badge-green' }[s] || 'badge-gray');
 
@@ -21,8 +22,8 @@ export default function RoadScoring() {
   const load = async () => {
     try {
       const [r, s] = await Promise.all([
-        fetch(`${API}/road-scoring/all`).then(r=>r.json()),
-        fetch(`${API}/road-scoring/stats`).then(r=>r.json()),
+        fetch(`${API}/road-scoring/all`, { headers: authH() }).then(r=>r.json()),
+        fetch(`${API}/road-scoring/stats`, { headers: authH() }).then(r=>r.json()),
       ]);
       if (r.success) setRoads(r.data);
       if (s.success) setStats(s.data);
@@ -36,7 +37,7 @@ export default function RoadScoring() {
     e.preventDefault(); setError(''); setOk(''); setBusy(true);
     try {
       const res  = await fetch(`${API}/road-scoring/score`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST', headers:authH(),
         body: JSON.stringify({
           ...form,
           roadQuality:       parseFloat(form.roadQuality),

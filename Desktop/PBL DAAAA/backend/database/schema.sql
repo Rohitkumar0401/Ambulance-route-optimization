@@ -20,6 +20,11 @@ CREATE TABLE IF NOT EXISTS hospitals (
   longitude DECIMAL(11, 8) NOT NULL,
   contact VARCHAR(20),
   facilities JSON,
+  total_beds INT DEFAULT 0,
+  available_beds INT DEFAULT 0,
+  is_available BOOLEAN DEFAULT TRUE,
+  operating_hours VARCHAR(100) DEFAULT '24/7',
+  rating DECIMAL(2,1) DEFAULT 0.0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -101,6 +106,29 @@ CREATE TABLE IF NOT EXISTS road_scores (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_flag_status (flag_status),
   INDEX idx_composite_score (composite_score)
+);
+
+-- Hospital history / audit log table
+CREATE TABLE IF NOT EXISTS hospital_history (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  hospital_id     INT NOT NULL,
+  hospital_name   VARCHAR(200),
+  change_type     ENUM('beds_updated', 'availability_changed', 'rating_submitted', 'created', 'updated', 'deleted') NOT NULL,
+  old_value       VARCHAR(255),
+  new_value       VARCHAR(255),
+  note            TEXT,
+  changed_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_hospital_id (hospital_id),
+  INDEX idx_changed_at (changed_at)
+);
+
+-- Hospital ratings table (individual submissions for running average)
+CREATE TABLE IF NOT EXISTS hospital_ratings (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  hospital_id INT NOT NULL,
+  rating      DECIMAL(2,1) NOT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_hospital_id (hospital_id)
 );
 
 -- Activity log table
