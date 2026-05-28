@@ -34,12 +34,19 @@ Thumbs.db
 *.sql.backup
 backup.sql
 
+# Compiled Java output
+out/
+*.class
+backend/modules/hospital-management/out/
+
 # Compiled C++
 *.o
 *.exe
-*.out
 backend/modules/route-optimization/cpp/dijkstra
 backend/modules/route-optimization/cpp/*.out
+
+# Java JARs (dependencies — keep in lib/ if needed)
+*.jar
 
 # Testing
 coverage/

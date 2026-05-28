@@ -123,8 +123,21 @@ export default function Login({ onLogin }) {
           {mode === 'login' && (
             <div className="login-hint">
               <p><strong>Demo credentials</strong></p>
-              <p>Email: admin@ambulance.com</p>
-              <p>Password: admin123</p>
+              <div style={{display:'grid',gap:6,marginTop:6}}>
+                {[
+                  {role:'Admin',      email:'admin@ambulance.com',      pw:'admin123'},
+                  {role:'Dispatcher', email:'dispatcher@ambulance.com', pw:'dispatch123'},
+                  {role:'Driver',     email:'driver@ambulance.com',     pw:'driver123'},
+                ].map(c => (
+                  <div key={c.role} style={{background:'white',borderRadius:6,padding:'6px 10px',
+                    border:'1px solid #e2e8f0',cursor:'pointer'}}
+                    onClick={() => setForm(f=>({...f,email:c.email,password:c.pw}))}>
+                    <span style={{fontWeight:700,fontSize:11,color:'#4f46e5'}}>{c.role}</span>
+                    <span style={{color:'#64748b',fontSize:11,marginLeft:6}}>{c.email}</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{marginTop:6,fontSize:11,color:'#94a3b8'}}>Click a row to auto-fill</p>
             </div>
           )}
         </div>

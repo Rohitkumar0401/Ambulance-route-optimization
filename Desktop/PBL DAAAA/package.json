@@ -4,9 +4,12 @@
   "description": "Ambulance Route Optimization System — Team Visitors",
   "main": "backend/server.js",
   "scripts": {
-    "server": "node backend/server.js",
-    "dev":    "npm start --prefix frontend",
-    "db:init": "node backend/config/dbInit.js"
+    "start":    "bash start.sh",
+    "backend":  "bash build_and_run.sh",
+    "frontend": "npm start --prefix frontend",
+    "server":   "node backend/server.js",
+    "dev":      "npm start --prefix frontend",
+    "db:init":  "bash build_and_run.sh db-init"
   },
   "author": "Team Visitors (Rohit Kumar, Rahul Singh, Kabeer Kandari, Karan Singh)",
   "license": "MIT",
